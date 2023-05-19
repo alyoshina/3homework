@@ -1,21 +1,24 @@
+#include "check_value.h"
+
 #include <iostream>
 
-int main() {
+int check_value(const int target_value) {
 
-	const int target_value = 54;
+	int attempts_count = 0;
 	int current_value = 0;
 	bool not_win = true;
 
-	std::cout << "Enter your guess:" << std::endl;
-
 	do {
+		attempts_count++;
+
+		std::cout << "Enter number:" << std::endl;
 		std::cin >> current_value;
 
 		if (current_value < target_value) {
-			std::cout << "less than " << current_value << std::endl;
+			std::cout << current_value << " is less than the number" << std::endl;
 		}
 		else if (current_value > target_value) {
-			std::cout << "greater than " << current_value << std::endl;
+			std::cout << current_value << " is greater than the number" << std::endl;
 		}
 		else {
 			std::cout << "you win!" << std::endl;
@@ -24,5 +27,5 @@ int main() {
 
 	} while(true);
 
-	return 0;
+	return attempts_count;
 }
