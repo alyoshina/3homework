@@ -36,14 +36,28 @@ int main(int argc, char** argv) {
             read_score();
             return 0;
         }
+        
+        if (arg == "-level") {
+            arguments.level_value = std::stoi(argv[++i]);
+        }
     }
 
+    if (args_status(arguments) == 1) {
+        std::cout << "Error situation: ";
+        std::cout << "input parameters “-level” and “-max” simultaneously. ";
+        std::cout << "Set either “-level“ or “-max”." << std::endl;
+        return 0;
+    }
+    
     std::cout << "Hi! Enter your name, please:" << std::endl;
 	std::string user_name;
 	std::cin >> user_name;
-
-    int attempts_count = check_value(get_random_value(arguments.max_value));
-
+    
+    int max_value = get_max_value(arguments.level_value, arguments.max_value);
+    std::cout << "Max value: " << max_value << std::endl;
+    
+    int attempts_count = check_value(get_random_value(max_value));
+    
     //write_new_score(user_name, attempts_count);
     overwrite_score(user_name, attempts_count);
     read_the_best_score();
