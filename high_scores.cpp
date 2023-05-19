@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <fstream>
-
+#include <sstream>
 #include <map>
 
 int write_new_score(const std::string user_name, int attempts_count, const std::string filename) {
@@ -78,6 +78,45 @@ int read_the_best_score(const std::string filename) {
 		for (; it != users_map.end(); it++) {
 			std::cout << it->first << '\t' << it->second << std::endl;
 		}
+	}
+	return 0;
+}
+
+//Search for the first entry with name and replace its score
+int overwrite_score(const std::string name, int score, const std::string filename) {
+	bool is_new_name = true;
+	
+	std::fstream io_file{filename};
+	if (io_file.is_open()) {
+		std::string username;
+		int high_score = 0;
+		std::streamoff pos_p = io_file.tellp(); //returns the output position indicator
+		while (io_file >> username >> high_score) {
+			if (username == name) {
+				is_new_name = false;
+				
+				//Save the rest of file
+				io_file.ignore();
+				std::stringstream file_rest;
+				file_rest << io_file.rdbuf();
+				
+				//Write new score for username
+				io_file.seekp(pos_p);
+				io_file << name << ' ' << score << std::endl;
+				
+				//Write the rest of file
+				io_file << file_rest.str();
+				break;
+			} else {
+				io_file.ignore();
+				pos_p = io_file.tellp();
+			}
+		}
+	}
+	io_file.close();
+	
+	if (is_new_name && (write_new_score(name, score, filename) < 0)) {
+		return -1;
 	}
 	return 0;
 }
