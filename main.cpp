@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
             std::cout << std::setiosflags(std::ios::left);
             //std::cout << std::setw(n) << "-level" << " - difficulty level. It depends on the maximum value of given number." << std::endl;
             std::cout << std::setw(n) << "-max" << " - sets the maximum value for hidden number." << std::endl;
-            //std::cout << std::setw(n) << "-table" << " - displays the scores table, without the need to play." << std::endl;
+            std::cout << std::setw(n) << "-table" << " - displays the scores table, without the need to play." << std::endl;
             std::cout << std::setiosflags(std::ios::right);
 
             std::cout << "Do you want to start game? yes/no" << std::endl;
@@ -30,6 +30,11 @@ int main(int argc, char** argv) {
 
         if (arg == "-max") {
             arguments.max_value = std::stoi(argv[++i]);
+        }
+
+        if (arg == "-table") {
+            read_score();
+            return 0;
         }
     }
 
