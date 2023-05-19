@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <map>
 
 int write_new_score(const std::string user_name, int attempts_count, const std::string filename) {
 
@@ -47,5 +48,36 @@ int read_score(const std::string filename) {
 		std::cout << username << '\t' << high_score << std::endl;
 	}
 
+	return 0;
+}
+
+//Read the table of records for each user,
+//determine the minimum value of number attempts and output them
+int read_the_best_score(const std::string filename) {
+	std::ifstream in_file{filename};
+	if (!in_file.is_open()) {
+		std::cout << "Failed to open file for read: " << filename << "!" << std::endl;
+		return -1;
+	} else {
+		std::map<std::string, int> users_map;
+		std::string username;
+		int high_score = 0;
+		while (in_file >> username >> high_score) {
+			std::map<std::string, int>::iterator it = users_map.find(username);
+			if (it != users_map.end() && (high_score < it->second)) {
+				users_map[it->first] = high_score;
+			} else {
+				users_map[username] = high_score;
+			}
+		}
+		in_file.close();
+		
+		//Print scores table
+		std::cout << "The best scores table:" << std::endl;
+		std::map<std::string, int>::iterator it = users_map.begin();
+		for (; it != users_map.end(); it++) {
+			std::cout << it->first << '\t' << it->second << std::endl;
+		}
+	}
 	return 0;
 }

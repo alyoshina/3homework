@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     int attempts_count = check_value(get_random_value(arguments.max_value));
 
     write_new_score(user_name, attempts_count);
-    read_score();
+    read_the_best_score();
 
     return 0;
 }

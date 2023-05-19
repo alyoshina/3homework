@@ -6,5 +6,6 @@
 int write_new_score(const std::string user_name, int attempts_count, 
                             const std::string filename = HIGH_SCORES_FILENAME);
 int read_score(const std::string filename = HIGH_SCORES_FILENAME);
+int read_the_best_score(const std::string filename = HIGH_SCORES_FILENAME);
 
 
