@@ -7,7 +7,6 @@
 #include <string>
 
 int main(int argc, char** argv) {
-
     Arguments arguments;
     for (int i = 0; i < argc; i++) {
         std::string arg{ argv[i] };
@@ -51,8 +50,8 @@ int main(int argc, char** argv) {
     
     std::cout << "Hi! Enter your name, please:" << std::endl;
 	std::string user_name;
-	std::cin >> user_name;
-    
+    std::getline(std::cin, user_name);
+
     int max_value = get_max_value(arguments.level_value, arguments.max_value);
     std::cout << "Max value: " << max_value << std::endl;
     

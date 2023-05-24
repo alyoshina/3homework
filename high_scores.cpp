@@ -5,7 +5,7 @@
 #include <sstream>
 #include <map>
 
-int write_new_score(const std::string user_name, int attempts_count, const std::string filename) {
+int write_new_score(const std::string& user_name, int attempts_count, const std::string& filename) {
 
 	std::ofstream out_file{filename, std::ios_base::app};
 	if (!out_file.is_open()) {
@@ -21,7 +21,7 @@ int write_new_score(const std::string user_name, int attempts_count, const std::
 	return 0;
 }
 
-int read_score(const std::string filename) {
+int read_score(const std::string& filename) {
 	std::ifstream in_file{filename};
 	if (!in_file.is_open()) {
 		std::cout << "Failed to open file for read: " << filename << "!" << std::endl;
@@ -32,91 +32,117 @@ int read_score(const std::string filename) {
 
 	std::string username;
 	int high_score = 0;
-	while (true) {
-		// Read the username first
-		in_file >> username;
-		// Read the high score next
-		in_file >> high_score;
-		// Ignore the end of line symbol
-		in_file.ignore();
 
-		if (in_file.fail()) {
-			break;
+	for (std::string line; std::getline(in_file, line); ) {
+		username = "";
+		high_score = get_data_from_line(line, username);
+		if (high_score) {
+			// Print the information to the screen
+			std::cout << username << '\t' << high_score << std::endl;
 		}
-
-		// Print the information to the screen
-		std::cout << username << '\t' << high_score << std::endl;
 	}
 
 	return 0;
 }
 
-//Read the table of records for each user,
-//determine the minimum value of number attempts and output them
-int read_the_best_score(const std::string filename) {
+std::vector<std::string> split(const std::string& str, char delimiter) {
+   std::vector<std::string> v;
+   std::string s;
+   std::istringstream stream(str);
+   while (std::getline(stream, s, delimiter)) {
+      v.push_back(s);
+   }
+   return v;
+}
+
+int get_data_from_line(std::string& line, std::string& username) {
+	int high_score = 0;
+	std::vector<std::string> v = split(line, char{' '});
+	if (!v.empty()) {
+		high_score = std::stoi(v.back());
+		auto it = v.begin();
+		username = *it;
+		it++;
+		for (it; it != v.end() - 1; it++) {
+			username += " " + *it;
+		}
+	}
+	return high_score;
+}
+
+int get_users_map(std::map<std::string, int>& users_map, const std::string& filename) {
 	std::ifstream in_file{filename};
 	if (!in_file.is_open()) {
 		std::cout << "Failed to open file for read: " << filename << "!" << std::endl;
 		return -1;
 	} else {
-		std::map<std::string, int> users_map;
 		std::string username;
 		int high_score = 0;
-		while (in_file >> username >> high_score) {
-			std::map<std::string, int>::iterator it = users_map.find(username);
-			if (it != users_map.end() && (high_score < it->second)) {
-				users_map[it->first] = high_score;
-			} else {
-				users_map[username] = high_score;
+
+		for (std::string line; std::getline(in_file, line); ) {
+			username = "";
+			high_score = get_data_from_line(line, username);
+			if (high_score) {
+				std::map<std::string, int>::iterator it = users_map.find(username);
+				if (it != users_map.end()) {
+					if (high_score < it->second) {
+						users_map[it->first] = high_score;
+					}
+				} else {
+					users_map[username] = high_score;
+				}
 			}
 		}
-		in_file.close();
-		
-		//Print scores table
-		std::cout << "The best scores table:" << std::endl;
-		std::map<std::string, int>::iterator it = users_map.begin();
-		for (; it != users_map.end(); it++) {
-			std::cout << it->first << '\t' << it->second << std::endl;
-		}
 	}
+
+	in_file.close();
 	return 0;
 }
 
-//Search for the first entry with name and replace its score
-int overwrite_score(const std::string name, int score, const std::string filename) {
-	bool is_new_name = true;
+//Read the table of records for each user,
+//determine the minimum value of number attempts and output them
+int read_the_best_score(const std::string& filename) {
+	std::map<std::string, int> users_map;
+	get_users_map(users_map, filename);
+
+	//Print scores table
+	std::cout << "The best scores table:" << std::endl;
+	std::map<std::string, int>::iterator it = users_map.begin();
+	for (; it != users_map.end(); it++) {
+		std::cout << it->first << '\t' << it->second << std::endl;
+	}
 	
-	std::fstream io_file{filename};
-	if (io_file.is_open()) {
-		std::string username;
-		int high_score = 0;
-		std::streamoff pos_p = io_file.tellp(); //returns the output position indicator
-		while (io_file >> username >> high_score) {
-			if (username == name) {
-				is_new_name = false;
-				
-				//Save the rest of file
-				io_file.ignore();
-				std::stringstream file_rest;
-				file_rest << io_file.rdbuf();
-				
-				//Write new score for username
-				io_file.seekp(pos_p);
-				io_file << name << ' ' << score << std::endl;
-				
-				//Write the rest of file
-				io_file << file_rest.str();
-				break;
-			} else {
-				io_file.ignore();
-				pos_p = io_file.tellp();
+	return 0;
+}
+
+//Search for name and replace its score
+int overwrite_score(const std::string& name, int score, const std::string& filename) {
+	std::map<std::string, int> users_map;
+	get_users_map(users_map, filename);
+
+	{
+		std::map<std::string, int>::iterator it = users_map.find(name);
+		if (it != users_map.end()) {
+			if (score < it->second) {
+				users_map[it->first] = score;
 			}
+		} else {
+			users_map[name] = score;
 		}
 	}
-	io_file.close();
-	
-	if (is_new_name && (write_new_score(name, score, filename) < 0)) {
+
+	std::ofstream out_file{filename};
+	if (!out_file.is_open()) {
+		std::cout << "Failed to open file for write: " << filename << "!" << std::endl;
 		return -1;
 	}
+
+	for (auto it = users_map.begin(); it != users_map.end(); it++) {
+		out_file << it->first << ' ';
+		out_file << it->second;
+		out_file << std::endl;
+	}
+	out_file.close();
+
 	return 0;
 }
